@@ -1,25 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Personagem = void 0;
-const acoes_1 = require("./acoes");
-class Personagem {
-    _id;
-    _nome;
-    _vida;
-    _vidaMax;
-    _ataque;
-    _historico = [];
-    _danoCausado = 0;
-    _danoRecebido = 0;
-    _abates = 0;
-    constructor(id, nome, vida, vidaMax, ataque) {
+var acoes_1 = require("./acoes");
+var Personagem = /** @class */ (function () {
+    function Personagem(id, nome, vida, vidaMax, ataque) {
+        this._historico = [];
+        this._danoCausado = 0;
+        this._danoRecebido = 0;
+        this._abates = 0;
         if (!Number.isInteger(id) || id <= 0) {
             throw new Error("Id inválido");
         }
         if (!nome || !nome.trim()) {
             throw new Error("Nome inválido");
         }
-        if (vidaMax < 0 || vida < 0 || vida > vidaMax || vida > 100 || vidaMax > 100) {
+        if (vidaMax <= 0 || vida < 0 || vida > vidaMax) {
             throw new Error("Vida inválida");
         }
         if (ataque < 0) {
@@ -31,49 +26,69 @@ class Personagem {
         this._vidaMax = vidaMax;
         this._ataque = ataque;
     }
-    get id() {
-        return this._id;
-    }
-    get nome() {
-        return this._nome;
-    }
-    get vida() {
-        return this._vida;
-    }
-    set vida(valor) {
-        if (valor < 0)
-            valor = 0;
-        if (valor > this._vidaMax)
-            valor = this._vidaMax;
-        this._vida = valor;
-    }
-    get vidaMax() {
-        return this._vidaMax;
-    }
-    get ataque() {
-        return this._ataque;
-    }
-    estaVivo() {
+    Object.defineProperty(Personagem.prototype, "id", {
+        get: function () {
+            return this._id;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Personagem.prototype, "nome", {
+        get: function () {
+            return this._nome;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Personagem.prototype, "vida", {
+        get: function () {
+            return this._vida;
+        },
+        set: function (valor) {
+            if (valor < 0)
+                valor = 0;
+            if (valor > this._vidaMax)
+                valor = this._vidaMax;
+            this._vida = valor;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Personagem.prototype, "vidaMax", {
+        get: function () {
+            return this._vidaMax;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Personagem.prototype, "ataque", {
+        get: function () {
+            return this._ataque;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Personagem.prototype.estaVivo = function () {
         return this._vida > 0;
-    }
-    receberDano(valor) {
+    };
+    Personagem.prototype.receberDano = function (valor) {
         if (!this.estaVivo() || valor <= 0)
             return;
         this.vida -= valor;
         this._danoRecebido += valor;
-    }
-    registrarDanoCausado(valor) {
+    };
+    Personagem.prototype.registrarDanoCausado = function (valor) {
         if (valor > 0) {
             this._danoCausado += valor;
         }
-    }
-    registrarAbate() {
+    };
+    Personagem.prototype.registrarAbate = function () {
         this._abates++;
-    }
-    registrarAcao(acao) {
+    };
+    Personagem.prototype.registrarAcao = function (acao) {
         this._historico.push(acao);
-    }
-    getEstatisticas() {
+    };
+    Personagem.prototype.getEstatisticas = function () {
         return {
             nome: this._nome,
             danoCausado: this._danoCausado,
@@ -81,8 +96,8 @@ class Personagem {
             abates: this._abates,
             vidaFinal: this._vida
         };
-    }
-    atacar(alvo) {
+    };
+    Personagem.prototype.atacar = function (alvo) {
         if (!this.estaVivo()) {
             throw new Error("Personagem morto não pode atacar");
         }
@@ -92,8 +107,8 @@ class Personagem {
         if (this === alvo) {
             throw new Error("Ataque inválido");
         }
-        const dano = this._ataque;
-        const acao = new acoes_1.Acao(this, alvo, acoes_1.TipoAcao.ATAQUE, dano, this._nome + " ataca " + alvo.nome);
+        var dano = this._ataque;
+        var acao = new acoes_1.Acao(this, alvo, acoes_1.TipoAcao.ATAQUE, dano, this._nome + " ataca " + alvo.nome);
         if (dano > 0) {
             alvo.receberDano(dano);
             this.registrarDanoCausado(dano);
@@ -104,8 +119,8 @@ class Personagem {
             this.registrarAbate();
         }
         return [acao];
-    }
-    toJSON() {
+    };
+    Personagem.prototype.toJSON = function () {
         return {
             tipo: this.constructor.name,
             id: this._id,
@@ -117,14 +132,15 @@ class Personagem {
             danoRecebido: this._danoRecebido,
             abates: this._abates
         };
-    }
-    static fromJSON(dados) {
-        const p = new Personagem(Number(dados.id), dados.nome, Number(dados.vida), Number(dados.vidaMax), Number(dados.ataque));
+    };
+    Personagem.fromJSON = function (dados) {
+        var p = new Personagem(dados.id, dados.nome, dados.vida, dados.vidaMax, dados.ataque);
         p._danoCausado = dados.danoCausado !== undefined ? dados.danoCausado : 0;
         p._danoRecebido = dados.danoRecebido !== undefined ? dados.danoRecebido : 0;
         p._abates = dados.abates !== undefined ? dados.abates : 0;
         return p;
-    }
-}
+    };
+    return Personagem;
+}());
 exports.Personagem = Personagem;
 //# sourceMappingURL=personagemBase.js.map

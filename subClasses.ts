@@ -1,179 +1,253 @@
 import { Personagem } from "./personagemBase";
 import { Acao, TipoAcao } from "./acoes";
 
-// Classe do Guerreiro, se a ação não puder ser realizada, o retorno será Null.
-class Guerreiro extends Personagem{
-    atacar(alvo: Personagem): Acao{
-        // Verifica se o personagem ainda está vivo, retorna um ataque Falha
-        if(!this.estaVivo()){
-            console.log(`${this.nome} está morto e não pode mais atacar!`);
-            let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-            this.registrarAcao(acao)
-            return acao
-        }else{
-            // Verifica se o alvo é o própio atacante, retorna um ataque Falha
-            if (this == alvo){
-                console.log(`${this.nome} não pode atacar a si mesmo...`);
-                let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-                this.registrarAcao(acao)
-                return acao
-            }else{
-                let danoCalculado = this.ataqueBase
-
-                // Primeiro Ataque, caso a vida esteja menos de 30%
-                if (this.vida < (this.vidaMaxima * 0.3)){
-                    danoCalculado *= 1.3;
-                }
-
-                // Segundo Ataque, caso o alvo seja um Mago
-                if (alvo instanceof Mago) {
-                    danoCalculado += 3;
-                }
-
-                // Aplicando a Defesa do Alvo para o cálculo final do Dano Total
-                danoCalculado = Math.max(0, danoCalculado - alvo.defesaBase );
-                alvo.receberDano(danoCalculado);
-                // Registrando a Ação no alvo e do atacante.
-                let acao:Acao = new Acao(this, alvo, TipoAcao.ATAQUE, danoCalculado);
-                this.registrarAcao(acao);
-                alvo.registrarAcao(acao)
-                return acao
-            }
+class Guerreiro extends Personagem {
+    protected _defesa: number;
+    constructor( id: number, nome: string, vida: number, vidaMax: number, ataque: number, defesa: number
+    ) {
+        super(id, nome, vida, vidaMax, ataque);
+        if (defesa < 0) {
+            throw new Error("Defesa inválida");
         }
+
+        this._defesa = defesa;
+    }
+
+    atacar(alvo: Personagem): Acao[] {
+        if (!this.estaVivo()) throw new Error("Guerreiro morto");
+        if (!alvo.estaVivo()) throw new Error("Alvo morto");
+        if (this === alvo) throw new Error("Ataque inválido");
+
+        const enfurecido = this.vida < this.vidaMax * 0.3;
+        let dano = this.ataque;
+        if (enfurecido) {
+            dano = Math.floor(dano * 1.3);
+        }
+        let danoFinal = dano;
+
+        if (alvo instanceof Guerreiro && danoFinal <= alvo._defesa) {
+            danoFinal = 0;
+        }
+
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
+        }
+
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+
+        const descricao = danoFinal === 0
+            ? `${this.nome} ataca ${alvo.nome}, mas o ataque é BLOQUEADO pela defesa.`
+            : enfurecido
+                ? `${this.nome} desfere um ATAQUE ENFURECIDO em ${alvo.nome}!`
+                : `${this.nome} ataca ${alvo.nome} com sua espada.`;
+
+        const acao = new Acao(
+            this,
+            alvo,
+            TipoAcao.ATAQUE,
+            danoFinal,
+            descricao
+        );
+
+        this.registrarAcao(acao);
+        alvo.registrarAcao(acao);
+        return [acao];
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            defesa: this._defesa
+        };
     }
 }
 
 class Mago extends Personagem {
-    magia(alvo:Personagem): Acao{
-        if(!this.estaVivo()){
-            console.log(`${this.nome} está morto e não pode mais atacar!`);
-            let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-            this.registrarAcao(acao)
-            return acao
+    atacar(alvo: Personagem): Acao[] {
+        if (!this.estaVivo()) throw new Error("Mago morto");
+        if (!alvo.estaVivo()) throw new Error("Alvo morto");
+        if (this === alvo) throw new Error("Ataque inválido");
+        let dano = this.ataque;
 
-        }else{
-            if (this == alvo){
-                console.log(`${this.nome} não pode atacar a si mesmo...`);
-                let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-                this.registrarAcao(acao)
-                return acao
-
-            }else{
-                // Caso o Mago tenha 10pts de vida ou menos, ele não poderá realizar a magia!
-                if (this.vida <= 10){
-                    console.log(`${this.nome} não tem vida suficiente para realizar Magia!`)
-                    let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-                    this.registrarAcao(acao)
-                    return acao
-
-                }else{
-                    // Recebe o dano da execução da Magia
-                    this.receberDano(10);
-                    // Dano fixo de 25pts para Magia
-                    const danoMagia:number = 25;
-                    alvo.receberDano(danoMagia);
-
-                    // Registrando a Ação no alvo e do atacante.
-                    let acao = new Acao(this, alvo, TipoAcao.MAGIA, danoMagia);
-                    this.registrarAcao(acao);
-                    alvo.registrarAcao(acao);
-                    return acao;
-
-                }
-
-            }
+        if (alvo instanceof Arqueiro) {
+            dano *= 2;
         }
-    }
 
-    // Ataque Normal, talvez O Mago use o Cajado como Bastão ou apenas use um soco / chute
-    // Realiza com Desvantagem, ataqueBase reduzido
-    atacar(alvo: Personagem): Acao {
-        if(!this.estaVivo()){
-            console.log(`${this.nome} está morto e não pode mais atacar!`);
-            let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-            this.registrarAcao(acao)
-            return acao
-
-        }else{
-            if (this == alvo){
-                console.log(`${this.nome} não pode atacar a si mesmo...`);
-                let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-                this.registrarAcao(acao);
-                return acao;
-
-            }else{
-                // Apenas 60% do ataque Base
-                let danoCalculado = Math.max(0, (this.ataqueBase * 0.6) - alvo.defesaBase);
-                alvo.receberDano(danoCalculado);
-                let acao = new Acao(this, alvo, TipoAcao.ATAQUE, danoCalculado);
-                this.registrarAcao(acao);
-                alvo.registrarAcao(acao);
-                return acao;
-            }
+        let danoFinal = dano;
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
         }
+
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+
+        const acaoAtaque = new Acao(
+            this,
+            alvo,
+            TipoAcao.MAGIA,
+            danoFinal,
+            danoFinal === 0
+                ? `${this.nome} lança magia em ${alvo.nome}, mas a defesa bloqueia o ataque.`
+                : `${this.nome} lança magia em ${alvo.nome}.`
+        );
+
+        this.receberDano(10);
+
+        const acaoAutodano = new Acao(
+            this,
+            this,
+            TipoAcao.AUTODANO,
+            10,
+            `${this.nome} sofre o custo da magia.`
+        );
+
+        this.registrarAcao(acaoAtaque);
+        alvo.registrarAcao(acaoAtaque);
+        this.registrarAcao(acaoAutodano);
+        return [acaoAtaque, acaoAutodano];
     }
 }
 
 class Arqueiro extends Personagem {
-    atacar(alvo: Personagem): Acao {
-        if(!this.estaVivo()){
-            console.log(`${this.nome} está morto e não pode mais atacar!`);
-            let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-            this.registrarAcao(acao)
-            return acao
-        }else{
-            if (this == alvo){
-                console.log(`${this.nome} não pode atacar a si mesmo...`);
-                let acao:Acao = new Acao(this, this, TipoAcao.FALHA,0);
-                this.registrarAcao(acao)
-                return acao
-            }else{
-                // Realiza um ataque Duplo, logo será calculado dois Hits
-                let danoTotal: number = 0;
-                let tipoAcao = TipoAcao.ATAQUE_DUPLO;
-                for (let i = 0; i < 2; i++){
-                    let danoHit = this.ataqueBase;
+    protected _ataqueMultiplo: number;
 
-                    // Verificando se ocorreu Crítico 15%
-                    if (Math.random() <= 0.15){
-                        danoHit *= 2;
-                        tipoAcao = TipoAcao.CRITICO // Caso aconteça pelo menos 1 crítico, marca com Crítico no tipo
-                    }
-                    
-                    danoHit = Math.max(0, danoHit - alvo.defesaBase);
-                    alvo.receberDano(danoHit);
-                    danoTotal += danoHit;
-
-                    // Verifica se o alvo morreu no primeiro Hit e interromepe a ação
-                    if(!alvo.estaVivo()) {
-                        break;
-                    }
-                }  
-                
-                let acao: Acao = new Acao(this, alvo, tipoAcao, danoTotal);
-                this.registrarAcao(acao);
-                alvo.registrarAcao(acao);
-                return acao
-            }
+    constructor( id: number, nome: string, vida: number, vidaMax: number, ataque: number, ataqueMultiplo: number
+    ) {
+        super(id, nome, vida, vidaMax, ataque);
+        if (!Number.isFinite(ataqueMultiplo) || ataqueMultiplo < 2) {
+            throw new Error("Ataque múltiplo inválido");
         }
+
+        this._ataqueMultiplo = ataqueMultiplo;
+    }
+
+    atacar(alvo: Personagem): Acao[] {
+        if (!this.estaVivo()) throw new Error("Arqueiro morto");
+        if (!alvo.estaVivo()) throw new Error("Alvo morto");
+        if (this === alvo) throw new Error("Ataque inválido");
+
+        let dano = this.ataque;
+        let descricao = `${this.nome} dispara flecha em ${alvo.nome}.`;
+
+        if (Math.random() < 0.5) {
+            dano = this.ataque * this._ataqueMultiplo;
+            descricao = `${this.nome} dispara ATAQUE MÚLTIPLO em ${alvo.nome}!`;
+        }
+
+        if (!Number.isFinite(dano)) {
+            dano = 0;
+        }
+        let danoFinal = dano;
+
+        if (alvo instanceof Guerreiro && danoFinal <= (alvo as any)._defesa) {
+            danoFinal = 0;
+            descricao = `${this.nome} ataca ${alvo.nome}, mas o ataque é BLOQUEADO.`;
+        }
+
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
+        }
+
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+
+        const acao = new Acao(
+            this,
+            alvo,
+            TipoAcao.ATAQUE_MULTIPLO,
+            danoFinal,
+            descricao
+        );
+
+        this.registrarAcao(acao);
+        alvo.registrarAcao(acao);
+        return [acao];
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            ataqueMultiplo: this._ataqueMultiplo
+        };
     }
 }
 
-// Testando as Classes até agora
-// let guerreiro:Guerreiro = new Guerreiro(1,"Conan", 80, 80, 14, 10);
-// let mago:Mago = new Mago(1, "Gandalf", 65, 65, 8, 9);
-// let arqueiro:Arqueiro = new Arqueiro(1,"Link", 70, 70, 11, 10);
+class PersonagemCustomizado extends Personagem {
+    private _tipoCustom: string;
+    private _rouboVida: number;
+    private _chanceCritico: number;
 
-// guerreiro.atacar(arqueiro)
-// mago.magia(guerreiro)
-// arqueiro.atacar(mago)
+    constructor( id: number, nome: string, vida: number, vidaMax: number, ataque: number, tipoCustom: string, rouboVida: number, chanceCritico: number
+    ) {
+        super(id, nome, vida, vidaMax, ataque);
+        this._tipoCustom = tipoCustom;
+        this._rouboVida = rouboVida;
+        this._chanceCritico = chanceCritico;
+    }
 
-// console.log(mago.regastarHistorico());
-// console.log(guerreiro.regastarHistorico());
-// console.log(arqueiro.regastarHistorico());
-// console.log('-------------------------');
-// console.log(`${guerreiro.vida}/${guerreiro.vidaMaxima}HP`);
-// console.log(`${mago.vida}/${mago.vidaMaxima}HP`);
-// console.log(`${arqueiro.vida}/${arqueiro.vidaMaxima}HP`)
+    atacar(alvo: Personagem): Acao[] {
+        if (!this.estaVivo()) throw new Error("Personagem morto");
+        if (!alvo.estaVivo()) throw new Error("Alvo morto");
+        if (this === alvo) throw new Error("Ataque inválido");
+        let dano = this.ataque;
+        let critico = false;
 
-export {Guerreiro, Mago, Arqueiro}
+        if (Math.random() * 100 < this._chanceCritico) {
+            dano *= 2;
+            critico = true;
+        }
+        let danoFinal = dano;
+
+        if (alvo instanceof Guerreiro && danoFinal <= (alvo as any)._defesa) {
+            danoFinal = 0;
+        }
+
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
+
+            const cura = Math.floor(danoFinal * (this._rouboVida / 100));
+            this.vida += cura;
+        }
+
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+
+        const descricao = danoFinal === 0
+            ? `${this.nome} (${this._tipoCustom}) ataca ${alvo.nome}, mas o ataque é BLOQUEADO.`
+            : critico
+                ? `${this.nome} (${this._tipoCustom}) desfere um ATAQUE CRÍTICO em ${alvo.nome}!`
+                : `${this.nome} (${this._tipoCustom}) ataca ${alvo.nome}.`;
+
+        const acao = new Acao(
+            this,
+            alvo,
+            TipoAcao.ATAQUE,
+            danoFinal,
+            descricao
+        );
+
+        this.registrarAcao(acao);
+        alvo.registrarAcao(acao);
+        return [acao];
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            tipoCustom: this._tipoCustom,
+            rouboVida: this._rouboVida,
+            chanceCritico: this._chanceCritico
+        };
+    }
+}
+
+export { Guerreiro, Mago, Arqueiro, PersonagemCustomizado };
