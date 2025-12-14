@@ -1,30 +1,32 @@
-import { Personagem } from "./personagemBase";
+import { Personagem } from "./personagem";
 
 enum TipoAcao {
     ATAQUE = "ATAQUE",
     MAGIA = "MAGIA",
+    ATAQUE_ENFURECIDO = "ATAQUE_ENFURECIDO",
     ATAQUE_MULTIPLO = "ATAQUE_MULTIPLO",
+    ATAQUE_CRITICO = "ATAQUE_CRITICO",
+    ROUBO_VIDA = "ROUBO_VIDA",
     AUTODANO = "AUTODANO"
 }
-let contadorId = 1;
 
+let contadorId = 1;
 class Acao {
     private _id: number;
     private _origem: Personagem;
     private _alvo: Personagem;
     private _tipo: TipoAcao;
-    private _valor: number;
+    private _valorDano: number;
     private _descricao: string;
     private _dataHora: Date;
     private _rodada: number = 0;
 
-    constructor( origem: Personagem, alvo: Personagem, tipo: TipoAcao, valor: number, descricao: string
-    ) {
+    constructor( origem: Personagem, alvo: Personagem, tipo: TipoAcao, valorDano: number, descricao: string) {
         this._id = contadorId++;
         this._origem = origem;
         this._alvo = alvo;
         this._tipo = tipo;
-        this._valor = valor;
+        this._valorDano = valorDano;
         this._descricao = descricao;
         this._dataHora = new Date();
     }
@@ -45,8 +47,8 @@ class Acao {
         return this._tipo;
     }
 
-    get valor(): number {
-        return this._valor;
+    get valorDano(): number {
+        return this._valorDano;
     }
 
     get descricao(): string {
@@ -71,7 +73,7 @@ class Acao {
             origem: this._origem.nome,
             alvo: this._alvo.nome,
             tipo: this._tipo,
-            valor: this._valor,
+            valorDano: this._valorDano,
             descricao: this._descricao,
             rodada: this._rodada,
             dataHora: this._dataHora.toISOString()
@@ -81,21 +83,21 @@ class Acao {
     static fromJSON(dados: any, personagens: Personagem[]): Acao {
         const origem = personagens.find(p => p.nome === dados.origem);
         const alvo = personagens.find(p => p.nome === dados.alvo);
-    
         if (!origem || !alvo) {
             throw new Error("Erro ao reconstruir ação");
         }
-    
+
         const acao = new Acao(
             origem,
             alvo,
-            dados.tipo,
-            dados.valor,
+            dados.tipo as TipoAcao,
+            Number(dados.valorDano),
             dados.descricao
-        ); 
-        acao.rodada = dados.rodada;
+        );
+
+        acao.rodada = Number(dados.rodada);
         return acao;
-    }    
+    }
 }
 
 export { Acao, TipoAcao };

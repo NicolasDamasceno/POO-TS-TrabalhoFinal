@@ -1,27 +1,33 @@
-import { Personagem } from "./personagemBase";
+import { Personagem } from "./personagem";
 import { Guerreiro, Mago, Arqueiro, PersonagemCustomizado } from "./subClasses";
 
 class RegistroPersonagem {
     static criar(dados: any): Personagem {
         let personagem: Personagem;
+        let vidaSalva = Number(dados.vida);
+        let vidaConstrutor = vidaSalva > 0 ? vidaSalva : 1;
+
         switch (dados.tipo) {
             case "Guerreiro":
-                personagem = new Guerreiro(
-                    Number(dados.id),
-                    dados.nome,
-                    Number(dados.vida),
-                    Number(dados.vidaMax),
-                    Number(dados.ataque),
-                    Number(dados.defesa)
-                );
-                break;
+            personagem = new Guerreiro(
+            Number(dados.id),
+            dados.nome,
+            vidaConstrutor,
+            Number(dados.ataque),
+            Number(dados.defesa)
+            );
+            (personagem as Guerreiro).vidaInicial = Number(
+                dados.vidaInicial !== undefined && dados.vidaInicial !== null
+                    ? dados.vidaInicial
+                    : vidaConstrutor
+            );
+            break;
 
             case "Mago":
                 personagem = new Mago(
                     Number(dados.id),
                     dados.nome,
-                    Number(dados.vida),
-                    Number(dados.vidaMax),
+                    vidaConstrutor,
                     Number(dados.ataque)
                 );
                 break;
@@ -30,10 +36,9 @@ class RegistroPersonagem {
                 personagem = new Arqueiro(
                     Number(dados.id),
                     dados.nome,
-                    Number(dados.vida),
-                    Number(dados.vidaMax),
+                    vidaConstrutor,
                     Number(dados.ataque),
-                    Number(dados.ataqueMultiplo)  
+                    Number(dados.ataqueMultiplo)
                 );
                 break;
 
@@ -41,18 +46,19 @@ class RegistroPersonagem {
                 personagem = new PersonagemCustomizado(
                     Number(dados.id),
                     dados.nome,
-                    Number(dados.vida),
-                    Number(dados.vidaMax),
+                    vidaConstrutor,
                     Number(dados.ataque),
-                    dados.tipoCustom,              
+                    dados.tipoCustom,
                     Number(dados.rouboVida),
-                    Number(dados.chanceCritico)    
+                    Number(dados.chanceCritico)
                 );
                 break;
 
             default:
                 throw new Error("Tipo de personagem inválido");
         }
+
+        personagem.vida = vidaSalva;
 
         (personagem as any)._danoCausado =
         dados.danoCausado !== undefined ? dados.danoCausado : 0;

@@ -23,32 +23,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LogicaBatalha = void 0;
+exports.Batalha = void 0;
 const acoes_1 = require("./acoes");
 const registroPersonagem_1 = require("./registroPersonagem");
 const fs = __importStar(require("fs"));
-class LogicaBatalha {
+class Batalha {
     _personagens = [];
     _acoes = [];
     _estado = "NAO_INICIADA";
     _rodada = 0;
-    adicionarPersonagem(personagem) {
+    adicionarPersonagem(p) {
         if (this._estado !== "NAO_INICIADA") {
             throw new Error("Não é possível adicionar personagens após o início da batalha");
         }
-        const existe = this._personagens.find(p => p.nome === personagem.nome);
-        if (existe) {
+        if (this._personagens.some(x => x.nome === p.nome)) {
             throw new Error("Nome de personagem já existe");
         }
-        this._personagens.push(personagem);
+        if (this._personagens.some(x => x.id === p.id)) {
+            throw new Error("ID de personagem já existe");
+        }
+        this._personagens.push(p);
     }
     getPersonagens() {
         return this._personagens;
     }
     consultarPersonagem(nome) {
-        if (!nome || !nome.trim()) {
-            throw new Error("Nome inválido para consulta");
-        }
         const personagem = this._personagens.find(p => p.nome.toLowerCase() === nome.toLowerCase());
         if (!personagem) {
             throw new Error("Personagem não encontrado");
@@ -80,9 +79,14 @@ class LogicaBatalha {
     obterEstado() {
         return this._estado;
     }
-    executarTurno(atacante, defensor) {
+    turno(atacanteId, defensorId) {
         if (this._estado !== "EM_ANDAMENTO") {
             throw new Error("Batalha não está em andamento");
+        }
+        const atacante = this._personagens.find(p => p.id === atacanteId);
+        const defensor = this._personagens.find(p => p.id === defensorId);
+        if (!atacante || !defensor) {
+            throw new Error("IDs inválidos");
         }
         if (!atacante.estaVivo()) {
             throw new Error("Atacante está morto");
@@ -99,15 +103,17 @@ class LogicaBatalha {
             this._acoes.push(acao);
         }
         this._rodada++;
-        if (this.listarPersonagensVivos().length === 0) {
+        const vivos = this.listarPersonagensVivos();
+        if (vivos.length <= 1) {
             this._estado = "FINALIZADA";
         }
+        return acoes;
     }
     verificarVencedor() {
         const vivos = this.listarPersonagensVivos();
         return vivos.length === 1 ? vivos[0] : null;
     }
-    listarAcoesOrdenadas() {
+    listarAcoes() {
         return this._acoes
             .slice()
             .sort((a, b) => {
@@ -116,33 +122,52 @@ class LogicaBatalha {
             return a.id - b.id;
         });
     }
+    listarAcoesPorPersonagem(idPersonagem) {
+        return this.listarAcoes().filter(a => a.origem.id === idPersonagem);
+    }
     filtrarAcoes(filtro) {
         return this._acoes.filter(a => {
-            if (filtro.personagem &&
-                a.origem.nome !== filtro.personagem &&
-                a.alvo.nome !== filtro.personagem)
+            if (a.origem.id !== filtro.personagemId) {
                 return false;
-            if (filtro.tipo && a.tipo !== filtro.tipo)
-                return false;
-            if (filtro.apenasAtaques) {
-                if (a.tipo !== acoes_1.TipoAcao.ATAQUE &&
-                    a.tipo !== acoes_1.TipoAcao.ATAQUE_MULTIPLO &&
-                    a.tipo !== acoes_1.TipoAcao.MAGIA)
+            }
+            if (filtro.tipos && filtro.tipos.length > 0) {
+                if (!filtro.tipos.includes(a.tipo)) {
                     return false;
+                }
             }
-            if (filtro.rodadaInicio !== undefined && a.rodada < filtro.rodadaInicio) {
+            if (filtro.rodadaInicio !== undefined &&
+                a.rodada < filtro.rodadaInicio) {
                 return false;
             }
-            if (filtro.rodadaFim !== undefined && a.rodada > filtro.rodadaFim) {
+            if (filtro.rodadaFim !== undefined &&
+                a.rodada > filtro.rodadaFim) {
                 return false;
             }
             return true;
         });
     }
     replay() {
+        const vencedor = this.verificarVencedor();
+        const estado = this.obterEstado();
         console.log("\n===== REPLAY DA BATALHA =====");
-        for (const acao of this.listarAcoesOrdenadas()) {
-            console.log(`[Rodada ${acao.rodada}] ${acao.descricao} (Valor: ${acao.valor})`);
+        for (const acao of this.listarAcoes()) {
+            let descricao = acao.descricao;
+            if (!descricao || descricao.trim() === "") {
+                descricao = "Ação sem descrição";
+            }
+            console.log(`[Rodada ${acao.rodada}] ${descricao} (Valor: ${acao.valorDano})`);
+        }
+        if (estado === "FINALIZADA") {
+            console.log("\n===== DESFECHO DA BATALHA =====");
+            if (vencedor) {
+                console.log(`Vencedor: ${vencedor.nome} – ${vencedor.constructor.name}, ` +
+                    `sobrevivendo com ${vencedor.vida} de vida`);
+            }
+            else {
+                console.log(this.listarPersonagensVivos().length === 0
+                    ? "Resultado: EMPATE – Todos os personagens morreram"
+                    : "Resultado: EMPATE – Batalha encerrada sem vencedor");
+            }
         }
     }
     resumoBatalha() {
@@ -151,9 +176,9 @@ class LogicaBatalha {
         let texto = "\n===================================\n";
         texto += "        RESULTADO FINAL\n";
         texto += "===================================\n";
-        texto += `Estado final: ${this._estado}\n`;
-        texto += `Rodadas: ${this._rodada - 1}\n`;
-        texto += `Total de ações: ${this._acoes.length}\n`;
+        texto += "Estado final: " + this._estado + "\n";
+        texto += "Rodadas: " + (this._rodada - 1) + "\n";
+        texto += "Total de ações: " + this._acoes.length + "\n";
         if (this._estado === "FINALIZADA" && vencedor === null) {
             texto += vivos.length === 0
                 ? "Resultado: EMPATE (todos morreram)\n"
@@ -201,5 +226,5 @@ class LogicaBatalha {
         }
     }
 }
-exports.LogicaBatalha = LogicaBatalha;
-//# sourceMappingURL=logicaBatalha.js.map
+exports.Batalha = Batalha;
+//# sourceMappingURL=batalha.js.map

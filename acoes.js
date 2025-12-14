@@ -5,7 +5,10 @@ var TipoAcao;
 (function (TipoAcao) {
     TipoAcao["ATAQUE"] = "ATAQUE";
     TipoAcao["MAGIA"] = "MAGIA";
+    TipoAcao["ATAQUE_ENFURECIDO"] = "ATAQUE_ENFURECIDO";
     TipoAcao["ATAQUE_MULTIPLO"] = "ATAQUE_MULTIPLO";
+    TipoAcao["ATAQUE_CRITICO"] = "ATAQUE_CRITICO";
+    TipoAcao["ROUBO_VIDA"] = "ROUBO_VIDA";
     TipoAcao["AUTODANO"] = "AUTODANO";
 })(TipoAcao || (TipoAcao = {}));
 exports.TipoAcao = TipoAcao;
@@ -15,16 +18,16 @@ class Acao {
     _origem;
     _alvo;
     _tipo;
-    _valor;
+    _valorDano;
     _descricao;
     _dataHora;
     _rodada = 0;
-    constructor(origem, alvo, tipo, valor, descricao) {
+    constructor(origem, alvo, tipo, valorDano, descricao) {
         this._id = contadorId++;
         this._origem = origem;
         this._alvo = alvo;
         this._tipo = tipo;
-        this._valor = valor;
+        this._valorDano = valorDano;
         this._descricao = descricao;
         this._dataHora = new Date();
     }
@@ -40,8 +43,8 @@ class Acao {
     get tipo() {
         return this._tipo;
     }
-    get valor() {
-        return this._valor;
+    get valorDano() {
+        return this._valorDano;
     }
     get descricao() {
         return this._descricao;
@@ -61,7 +64,7 @@ class Acao {
             origem: this._origem.nome,
             alvo: this._alvo.nome,
             tipo: this._tipo,
-            valor: this._valor,
+            valorDano: this._valorDano,
             descricao: this._descricao,
             rodada: this._rodada,
             dataHora: this._dataHora.toISOString()
@@ -73,8 +76,8 @@ class Acao {
         if (!origem || !alvo) {
             throw new Error("Erro ao reconstruir ação");
         }
-        const acao = new Acao(origem, alvo, dados.tipo, dados.valor, dados.descricao);
-        acao.rodada = dados.rodada;
+        const acao = new Acao(origem, alvo, dados.tipo, Number(dados.valorDano), dados.descricao);
+        acao.rodada = Number(dados.rodada);
         return acao;
     }
 }

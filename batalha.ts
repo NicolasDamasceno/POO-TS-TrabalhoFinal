@@ -1,27 +1,29 @@
-import { Personagem } from "./personagemBase";
+import { Personagem } from "./personagem";
 import { Acao, TipoAcao } from "./acoes";
 import { RegistroPersonagem } from "./registroPersonagem";
 import * as fs from "fs";
 
 type EstadoBatalha = "NAO_INICIADA" | "EM_ANDAMENTO" | "FINALIZADA";
-
-class LogicaBatalha {
+class Batalha {
     private _personagens: Personagem[] = [];
     private _acoes: Acao[] = [];
     private _estado: EstadoBatalha = "NAO_INICIADA";
     private _rodada: number = 0;
 
-    adicionarPersonagem(personagem: Personagem): void {
+    adicionarPersonagem(p: Personagem): void {
         if (this._estado !== "NAO_INICIADA") {
             throw new Error("Não é possível adicionar personagens após o início da batalha");
         }
 
-        const existe = this._personagens.find(p => p.nome === personagem.nome);
-        if (existe) {
+        if (this._personagens.some(x => x.nome === p.nome)) {
             throw new Error("Nome de personagem já existe");
         }
 
-        this._personagens.push(personagem);
+        if (this._personagens.some(x => x.id === p.id)) {
+            throw new Error("ID de personagem já existe");
+        }
+
+        this._personagens.push(p);
     }
 
     getPersonagens(): Personagem[] {
@@ -29,13 +31,10 @@ class LogicaBatalha {
     }
 
     consultarPersonagem(nome: string): Personagem {
-        if (!nome || !nome.trim()) {
-            throw new Error("Nome inválido para consulta");
-        }
-
         const personagem = this._personagens.find(
             p => p.nome.toLowerCase() === nome.toLowerCase()
         );
+
         if (!personagem) {
             throw new Error("Personagem não encontrado");
         }
@@ -76,41 +75,50 @@ class LogicaBatalha {
         return this._estado;
     }
 
-    executarTurno(atacante: Personagem, defensor: Personagem): void {
+    turno(atacanteId: number, defensorId: number): Acao[] {
         if (this._estado !== "EM_ANDAMENTO") {
             throw new Error("Batalha não está em andamento");
         }
-
+    
+        const atacante = this._personagens.find(p => p.id === atacanteId);
+        const defensor = this._personagens.find(p => p.id === defensorId);
+        if (!atacante || !defensor) {
+            throw new Error("IDs inválidos");
+        }
+    
         if (!atacante.estaVivo()) {
             throw new Error("Atacante está morto");
         }
-
+    
         if (!defensor.estaVivo()) {
             throw new Error("Defensor já está morto");
         }
-
+    
         if (atacante === defensor) {
             throw new Error("Atacante e defensor não podem ser o mesmo");
         }
-
+    
         const acoes = atacante.atacar(defensor);
         for (const acao of acoes) {
             acao.rodada = this._rodada;
             this._acoes.push(acao);
         }
-
+    
         this._rodada++;
-        if (this.listarPersonagensVivos().length === 0) {
+        const vivos = this.listarPersonagensVivos();
+        if (vivos.length <= 1) {
             this._estado = "FINALIZADA";
         }
-    }
+    
+        return acoes;
+    }    
 
     verificarVencedor(): Personagem | null {
         const vivos = this.listarPersonagensVivos();
         return vivos.length === 1 ? vivos[0] : null;
     }
 
-    listarAcoesOrdenadas(): Acao[] {
+    listarAcoes(): Acao[] {
         return this._acoes
             .slice()
             .sort((a, b) => {
@@ -119,35 +127,40 @@ class LogicaBatalha {
             });
     }
 
+    listarAcoesPorPersonagem(idPersonagem: number): Acao[] {
+        return this.listarAcoes().filter(
+            a => a.origem.id === idPersonagem
+        );
+    }
+
     filtrarAcoes(filtro: {
-        personagem?: string;
-        tipo?: TipoAcao;
+        personagemId: number;
+        tipos?: TipoAcao[];
         rodadaInicio?: number;
         rodadaFim?: number;
-        apenasAtaques?: boolean;
     }): Acao[] {
         return this._acoes.filter(a => {
-            if (
-                filtro.personagem &&
-                a.origem.nome !== filtro.personagem &&
-                a.alvo.nome !== filtro.personagem
-            ) return false;
-
-            if (filtro.tipo && a.tipo !== filtro.tipo) return false;
-
-            if (filtro.apenasAtaques) {
-                if (
-                    a.tipo !== TipoAcao.ATAQUE &&
-                    a.tipo !== TipoAcao.ATAQUE_MULTIPLO &&
-                    a.tipo !== TipoAcao.MAGIA
-                ) return false;
-            }
-
-            if (filtro.rodadaInicio !== undefined && a.rodada < filtro.rodadaInicio) {
+            if (a.origem.id !== filtro.personagemId) {
                 return false;
             }
 
-            if (filtro.rodadaFim !== undefined && a.rodada > filtro.rodadaFim) {
+            if (filtro.tipos && filtro.tipos.length > 0) {
+                if (!filtro.tipos.includes(a.tipo)) {
+                    return false;
+                }
+            }
+
+            if (
+                filtro.rodadaInicio !== undefined &&
+                a.rodada < filtro.rodadaInicio
+            ) {
+                return false;
+            }
+
+            if (
+                filtro.rodadaFim !== undefined &&
+                a.rodada > filtro.rodadaFim
+            ) {
                 return false;
             }
 
@@ -156,24 +169,47 @@ class LogicaBatalha {
     }
 
     replay(): void {
+        const vencedor = this.verificarVencedor();
+        const estado = this.obterEstado();
+    
         console.log("\n===== REPLAY DA BATALHA =====");
-        for (const acao of this.listarAcoesOrdenadas()) {
+        for (const acao of this.listarAcoes()) {
+            let descricao = acao.descricao;
+            if (!descricao || descricao.trim() === "") {
+                descricao = "Ação sem descrição";
+            }
+    
             console.log(
-                `[Rodada ${acao.rodada}] ${acao.descricao} (Valor: ${acao.valor})`
+                `[Rodada ${acao.rodada}] ${descricao} (Valor: ${acao.valorDano})`
             );
         }
-    }
+    
+        if (estado === "FINALIZADA") {
+            console.log("\n===== DESFECHO DA BATALHA =====");
+            if (vencedor) {
+                console.log(
+                    `Vencedor: ${vencedor.nome} – ${vencedor.constructor.name}, ` +
+                    `sobrevivendo com ${vencedor.vida} de vida`
+                );
+            } else {
+                console.log(
+                    this.listarPersonagensVivos().length === 0
+                        ? "Resultado: EMPATE – Todos os personagens morreram"
+                        : "Resultado: EMPATE – Batalha encerrada sem vencedor"
+                );
+            }
+        }
+    }       
 
     resumoBatalha(): string {
         const vencedor = this.verificarVencedor();
         const vivos = this.listarPersonagensVivos();
-
         let texto = "\n===================================\n";
         texto += "        RESULTADO FINAL\n";
         texto += "===================================\n";
-        texto += `Estado final: ${this._estado}\n`;
-        texto += `Rodadas: ${this._rodada - 1}\n`;
-        texto += `Total de ações: ${this._acoes.length}\n`;
+        texto += "Estado final: " + this._estado + "\n";
+        texto += "Rodadas: " + (this._rodada - 1) + "\n";
+        texto += "Total de ações: " + this._acoes.length + "\n";
 
         if (this._estado === "FINALIZADA" && vencedor === null) {
             texto += vivos.length === 0
@@ -192,6 +228,7 @@ class LogicaBatalha {
             texto += `Abates=${e.abates}, `;
             texto += `Vida final=${e.vidaFinal}\n`;
         }
+
         return texto;
     }
 
@@ -218,14 +255,14 @@ class LogicaBatalha {
         this._rodada = Number(dados.rodada);
         this._personagens = [];
         this._acoes = [];
-
         for (const p of dados.personagens) {
             this._personagens.push(RegistroPersonagem.criar(p));
         }
+
         for (const a of dados.acoes) {
             this._acoes.push(Acao.fromJSON(a, this._personagens));
         }
     }
 }
 
-export { LogicaBatalha };
+export { Batalha };

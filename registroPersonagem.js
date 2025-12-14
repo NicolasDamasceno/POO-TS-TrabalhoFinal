@@ -5,22 +5,28 @@ const subClasses_1 = require("./subClasses");
 class RegistroPersonagem {
     static criar(dados) {
         let personagem;
+        let vidaSalva = Number(dados.vida);
+        let vidaConstrutor = vidaSalva > 0 ? vidaSalva : 1;
         switch (dados.tipo) {
             case "Guerreiro":
-                personagem = new subClasses_1.Guerreiro(Number(dados.id), dados.nome, Number(dados.vida), Number(dados.vidaMax), Number(dados.ataque), Number(dados.defesa));
+                personagem = new subClasses_1.Guerreiro(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque), Number(dados.defesa));
+                personagem.vidaInicial = Number(dados.vidaInicial !== undefined && dados.vidaInicial !== null
+                    ? dados.vidaInicial
+                    : vidaConstrutor);
                 break;
             case "Mago":
-                personagem = new subClasses_1.Mago(Number(dados.id), dados.nome, Number(dados.vida), Number(dados.vidaMax), Number(dados.ataque));
+                personagem = new subClasses_1.Mago(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque));
                 break;
             case "Arqueiro":
-                personagem = new subClasses_1.Arqueiro(Number(dados.id), dados.nome, Number(dados.vida), Number(dados.vidaMax), Number(dados.ataque), Number(dados.ataqueMultiplo));
+                personagem = new subClasses_1.Arqueiro(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque), Number(dados.ataqueMultiplo));
                 break;
             case "PersonagemCustomizado":
-                personagem = new subClasses_1.PersonagemCustomizado(Number(dados.id), dados.nome, Number(dados.vida), Number(dados.vidaMax), Number(dados.ataque), dados.tipoCustom, Number(dados.rouboVida), Number(dados.chanceCritico));
+                personagem = new subClasses_1.PersonagemCustomizado(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque), dados.tipoCustom, Number(dados.rouboVida), Number(dados.chanceCritico));
                 break;
             default:
                 throw new Error("Tipo de personagem inválido");
         }
+        personagem.vida = vidaSalva;
         personagem._danoCausado =
             dados.danoCausado !== undefined ? dados.danoCausado : 0;
         personagem._danoRecebido =

@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const readline = __importStar(require("readline"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const logicaBatalha_1 = require("./logicaBatalha");
+const batalha_1 = require("./batalha");
 const subClasses_1 = require("./subClasses");
 const acoes_1 = require("./acoes");
 const rl = readline.createInterface({
@@ -44,7 +44,7 @@ function listarBatalhasSalvas() {
     return fs.readdirSync(PASTA_SAVES).filter(arq => arq.endsWith(".json"));
 }
 async function main() {
-    const batalha = new logicaBatalha_1.LogicaBatalha();
+    const batalha = new batalha_1.Batalha();
     console.log("===================================");
     console.log("      SISTEMA DE BATALHA RPG");
     console.log("===================================");
@@ -53,7 +53,7 @@ async function main() {
         console.log("\nBATALHAS SALVAS:");
         batalhas.forEach((b, i) => console.log(`${i + 1} - ${b}`));
         console.log("0 - Iniciar nova batalha");
-        const escolha = Number(await perguntar("\nEscolha uma opção:"));
+        const escolha = Number(await perguntar("\nEscolha uma opção: "));
         if (escolha > 0 && escolha <= batalhas.length) {
             const caminho = path.join(PASTA_SAVES, batalhas[escolha - 1]);
             batalha.carregarDeArquivo(caminho);
@@ -99,9 +99,9 @@ async function main() {
         console.log("\nCONSULTAS");
         console.log("9 - Listar Vivos e Mortos");
         console.log("10 - Estatísticas dos Personagens");
-        console.log("11 - Filtrar Ações");
-        console.log("12 - Extrato / Replay da Batalha");
         if (estado !== "NAO_INICIADA") {
+            console.log("11 - Filtrar Ações");
+            console.log("12 - Extrato / Replay da Batalha");
             console.log("13 - Resumo da Batalha");
         }
         console.log("14 - Estado Atual da Batalha");
@@ -120,19 +120,19 @@ async function main() {
                         break;
                     }
                     if (op === "1") {
-                        batalha.adicionarPersonagem(new subClasses_1.Guerreiro(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida atual: ")), Number(await perguntar("Vida máxima: ")), Number(await perguntar("Ataque: ")), Number(await perguntar("Defesa: "))));
+                        batalha.adicionarPersonagem(new subClasses_1.Guerreiro(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque: ")), Number(await perguntar("Defesa: "))));
                         console.log("Guerreiro criado!");
                     }
                     if (op === "2") {
-                        batalha.adicionarPersonagem(new subClasses_1.Mago(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida atual: ")), Number(await perguntar("Vida máxima: ")), Number(await perguntar("Ataque mágico: "))));
+                        batalha.adicionarPersonagem(new subClasses_1.Mago(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque mágico: "))));
                         console.log("Mago criado!");
                     }
                     if (op === "3") {
-                        batalha.adicionarPersonagem(new subClasses_1.Arqueiro(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida atual: ")), Number(await perguntar("Vida máxima: ")), Number(await perguntar("Ataque: ")), Number(await perguntar("Multiplicador do ataque múltiplo: "))));
+                        batalha.adicionarPersonagem(new subClasses_1.Arqueiro(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque: ")), Number(await perguntar("Multiplicador do ataque múltiplo: "))));
                         console.log("Arqueiro criado!");
                     }
                     if (op === "4") {
-                        batalha.adicionarPersonagem(new subClasses_1.PersonagemCustomizado(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida atual: ")), Number(await perguntar("Vida máxima: ")), Number(await perguntar("Ataque: ")), await perguntar("Tipo customizado: "), Number(await perguntar("Roubo de vida (%): ")), Number(await perguntar("Chance crítica (%): "))));
+                        batalha.adicionarPersonagem(new subClasses_1.PersonagemCustomizado(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque: ")), await perguntar("Tipo customizado: "), Number(await perguntar("Roubo de vida (%): ")), Number(await perguntar("Chance crítica (%): "))));
                         console.log("Personagem customizado criado!");
                     }
                     break;
@@ -149,33 +149,33 @@ async function main() {
                     while (atacante.id === defensor.id) {
                         defensor = vivos[Math.floor(Math.random() * vivos.length)];
                     }
-                    batalha.executarTurno(atacante, defensor);
+                    batalha.turno(atacante.id, defensor.id);
                     console.log(`${atacante.nome} atacou ${defensor.nome}`);
                     break;
                 }
                 case "7": {
                     if (estado !== "EM_ANDAMENTO")
                         break;
-                    batalha.getPersonagens().forEach(p => console.log(`ID ${p.id} - ${p.nome} (${p.estaVivo() ? "VIVO" : "MORTO"})`));
-                    const idAtacante = Number(await perguntar("ID do atacante: "));
-                    const idDefensor = Number(await perguntar("ID do defensor: "));
-                    const atacante = batalha.getPersonagens().find(p => p.id === idAtacante);
-                    const defensor = batalha.getPersonagens().find(p => p.id === idDefensor);
+                    batalha.getPersonagens().forEach((p, i) => console.log(`ID ${p.id} - ${p.nome} (${p.estaVivo() ? "VIVO" : "MORTO"})`));
+                    const escolhaAtacante = Number(await perguntar("Escolha o atacante: "));
+                    const escolhaDefensor = Number(await perguntar("Escolha o defensor: "));
+                    const atacante = batalha.getPersonagens()[escolhaAtacante - 1];
+                    const defensor = batalha.getPersonagens()[escolhaDefensor - 1];
                     if (!atacante || !defensor) {
-                        console.log("IDs inválidos.");
+                        console.log("Escolha inválida.");
                         break;
                     }
-                    batalha.executarTurno(atacante, defensor);
-                    console.log(`${atacante.nome} atacou ${defensor.nome}`);
+                    batalha.turno(atacante.id, defensor.id);
                     break;
                 }
                 case "8":
                     if (estado !== "EM_ANDAMENTO") {
-                        console.log("A batalha não está em andamento.");
+                        console.log("Não é possível encerrar batalha que não está em andamento.");
                         break;
                     }
+                    console.log("Batalha encerrada previamente por desistência de ambas as partes.");
                     batalha.finalizarBatalha();
-                    console.log("Batalha encerrada manualmente.");
+                    console.log("\nResultado: EMPATE POR DESISTÊNCIA");
                     break;
                 case "9":
                     console.log("\nVIVOS:");
@@ -191,13 +191,57 @@ async function main() {
                     });
                     break;
                 case "11": {
-                    const nome = await perguntar("Personagem (ENTER para ignorar): ");
-                    const tipo = await perguntar("Tipo (ATAQUE, MAGIA, ATAQUE_MULTIPLO, AUTODANO): ");
-                    const acoes = batalha.filtrarAcoes({
-                        personagem: nome || undefined,
-                        tipo: tipo ? acoes_1.TipoAcao[tipo] : undefined
+                    const personagens = batalha.getPersonagens();
+                    personagens.forEach(p => {
+                        console.log(`ID ${p.id} - ${p.nome}`);
                     });
-                    acoes.forEach(a => console.log(`[Rodada ${a.rodada}] ${a.tipo} | ${a.origem.nome} → ${a.alvo.nome}`));
+                    const idPersonagem = Number(await perguntar("Digite o ID do personagem: "));
+                    const personagem = personagens.find(p => p.id === idPersonagem);
+                    if (!personagem) {
+                        console.log("Personagem inválido.");
+                        break;
+                    }
+                    const acoesDoPersonagem = batalha.listarAcoesPorPersonagem(personagem.id);
+                    if (acoesDoPersonagem.length === 0) {
+                        console.log("Nenhuma ação registrada para este personagem.");
+                        break;
+                    }
+                    const tiposUnicos = [];
+                    acoesDoPersonagem.forEach(a => {
+                        if (!tiposUnicos.includes(a.tipo)) {
+                            tiposUnicos.push(a.tipo);
+                        }
+                    });
+                    if (personagem.constructor.name === "Arqueiro" &&
+                        !tiposUnicos.includes(acoes_1.TipoAcao.ATAQUE)) {
+                        tiposUnicos.push(acoes_1.TipoAcao.ATAQUE);
+                    }
+                    console.log("\nTIPOS DE AÇÃO DISPONÍVEIS");
+                    console.log("0 - Todas");
+                    tiposUnicos.forEach((tipo, i) => {
+                        console.log(`${i + 1} - ${acoes_1.TipoAcao[tipo]}`);
+                    });
+                    const escolhaTipo = Number(await perguntar("Escolha um tipo de ação: "));
+                    let tiposSelecionados = undefined;
+                    if (escolhaTipo > 0 && escolhaTipo <= tiposUnicos.length) {
+                        tiposSelecionados = [tiposUnicos[escolhaTipo - 1]];
+                    }
+                    const acoes = batalha.filtrarAcoes({
+                        personagemId: personagem.id,
+                        tipos: tiposSelecionados
+                    });
+                    if (acoes.length === 0) {
+                        console.log("Nenhuma ação encontrada.");
+                        break;
+                    }
+                    console.log("\nAÇÕES FILTRADAS:");
+                    acoes.forEach((a, i) => {
+                        let descricao = a.descricao;
+                        if (!descricao || descricao.trim() === "") {
+                            descricao = "Ação sem descrição";
+                        }
+                        console.log(`${i + 1} - Rodada ${a.rodada} | ${acoes_1.TipoAcao[a.tipo]} | ${descricao} | Valor ${a.valorDano}`);
+                    });
                     break;
                 }
                 case "12":
@@ -227,7 +271,6 @@ async function main() {
                     console.log(`Nome: ${e.nome}`);
                     console.log(`Classe: ${p.constructor.name}`);
                     console.log(`Vida atual: ${p.vida}`);
-                    console.log(`Vida máxima: ${e.vidaFinal}`);
                     console.log(`Dano causado: ${e.danoCausado}`);
                     console.log(`Dano recebido: ${e.danoRecebido}`);
                     console.log(`Abates: ${e.abates}`);
@@ -253,4 +296,4 @@ async function main() {
     rl.close();
 }
 main();
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=simulacao.js.map
