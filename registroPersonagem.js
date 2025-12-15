@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegistroPersonagem = void 0;
+const personagem_1 = require("./personagem");
 const subClasses_1 = require("./subClasses");
+const Letalis = require("./subClasses");
 class RegistroPersonagem {
     static criar(dados) {
         let personagem;
@@ -22,6 +24,12 @@ class RegistroPersonagem {
                 break;
             case "PersonagemCustomizado":
                 personagem = new subClasses_1.PersonagemCustomizado(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque), dados.tipoCustom, Number(dados.rouboVida), Number(dados.chanceCritico));
+                break;
+            case "Letalis":
+                personagem = new subClasses_1.Letalis(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque));
+                break;
+            case "Guardiao":
+                personagem = new subClasses_1.Guardiao(Number(dados.id), dados.nome, vidaConstrutor, Number(dados.ataque));
                 break;
             default:
                 throw new Error("Tipo de personagem inválido");

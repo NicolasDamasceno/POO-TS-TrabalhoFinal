@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 const readline = __importStar(require("readline"));
 const fs = __importStar(require("fs"));
@@ -80,6 +90,8 @@ async function main() {
             console.log("2 - Criar Mago");
             console.log("3 - Criar Arqueiro");
             console.log("4 - Criar Personagem Customizado");
+            console.log("5 - Criar Letalis");
+            console.log("6 - Criar Guardião");
         }
         else {
             console.log("Criação de personagens bloqueada (batalha em andamento)");
@@ -89,23 +101,23 @@ async function main() {
         }
         console.log("\nBATALHA");
         if (estado === "NAO_INICIADA" && qtdPersonagens >= 2) {
-            console.log("5 - Iniciar Batalha");
+            console.log("7 - Iniciar Batalha");
         }
         if (estado === "EM_ANDAMENTO") {
-            console.log("6 - Executar Turno Aleatório");
-            console.log("7 - Executar Turno Manual");
-            console.log("8 - Encerrar Batalha");
+            console.log("8 - Executar Turno Aleatório");
+            console.log("9 - Executar Turno Manual");
+            console.log("10 - Encerrar Batalha");
         }
         console.log("\nCONSULTAS");
-        console.log("9 - Listar Vivos e Mortos");
-        console.log("10 - Estatísticas dos Personagens");
+        console.log("11 - Listar Vivos e Mortos");
+        console.log("12 - Estatísticas dos Personagens");
         if (estado !== "NAO_INICIADA") {
-            console.log("11 - Filtrar Ações");
-            console.log("12 - Extrato / Replay da Batalha");
-            console.log("13 - Resumo da Batalha");
+            console.log("13 - Filtrar Ações");
+            console.log("14 - Extrato / Replay da Batalha");
+            console.log("15 - Resumo da Batalha");
         }
-        console.log("14 - Estado Atual da Batalha");
-        console.log("15 - Consultar Personagem por Nome");
+        console.log("16 - Estado Atual da Batalha");
+        console.log("17 - Consultar Personagem por Nome");
         console.log("\nSISTEMA");
         console.log("0 - Salvar e Encerrar");
         const op = await perguntar("\nEscolha uma opção: ");
@@ -115,6 +127,8 @@ async function main() {
                 case "2":
                 case "3":
                 case "4":
+                case "5":
+                case "6":
                     if (estado !== "NAO_INICIADA") {
                         console.log("Não é possível criar personagens após iniciar a batalha.");
                         break;
@@ -135,12 +149,20 @@ async function main() {
                         batalha.adicionarPersonagem(new subClasses_1.PersonagemCustomizado(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque: ")), await perguntar("Tipo customizado: "), Number(await perguntar("Roubo de vida (%): ")), Number(await perguntar("Chance crítica (%): "))));
                         console.log("Personagem customizado criado!");
                     }
+                    if (op == "5") {
+                        batalha.adicionarPersonagem(new subClasses_1.Letalis(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque fatal: "))));
+                        console.log("Letalis criado!");
+                    }
+                    if (op == "6") {
+                        batalha.adicionarPersonagem(new subClasses_1.Guardiao(Number(await perguntar("Id: ")), await perguntar("Nome: "), Number(await perguntar("Vida: ")), Number(await perguntar("Ataque impossível: "))));
+                        console.log("Guardião criado!");
+                    }
                     break;
-                case "5":
+                case "7":
                     batalha.iniciarBatalha();
                     console.log("Batalha iniciada!");
                     break;
-                case "6": {
+                case "8": {
                     if (estado !== "EM_ANDAMENTO")
                         break;
                     const vivos = batalha.listarPersonagensVivos();
@@ -153,7 +175,7 @@ async function main() {
                     console.log(`${atacante.nome} atacou ${defensor.nome}`);
                     break;
                 }
-                case "7": {
+                case "9": {
                     if (estado !== "EM_ANDAMENTO")
                         break;
                     batalha.getPersonagens().forEach((p, i) => console.log(`ID ${p.id} - ${p.nome} (${p.estaVivo() ? "VIVO" : "MORTO"})`));
@@ -168,7 +190,7 @@ async function main() {
                     batalha.turno(atacante.id, defensor.id);
                     break;
                 }
-                case "8":
+                case "10":
                     if (estado !== "EM_ANDAMENTO") {
                         console.log("Não é possível encerrar batalha que não está em andamento.");
                         break;
@@ -177,20 +199,20 @@ async function main() {
                     batalha.finalizarBatalha();
                     console.log("\nResultado: EMPATE POR DESISTÊNCIA");
                     break;
-                case "9":
+                case "11":
                     console.log("\nVIVOS:");
                     batalha.listarPersonagensVivos().forEach(p => console.log(`- ${p.nome}`));
                     console.log("\nMORTOS:");
                     batalha.listarPersonagensMortos().forEach(p => console.log(`- ${p.nome}`));
                     break;
-                case "10":
+                case "12":
                     batalha.getPersonagens().forEach(p => {
                         const e = p.getEstatisticas();
                         console.log(`${e.nome} | Dano causado: ${e.danoCausado} | ` +
                             `Dano recebido: ${e.danoRecebido} | Abates: ${e.abates} | Vida final: ${e.vidaFinal}`);
                     });
                     break;
-                case "11": {
+                case "13": {
                     const personagens = batalha.getPersonagens();
                     personagens.forEach(p => {
                         console.log(`ID ${p.id} - ${p.nome}`);
@@ -244,16 +266,16 @@ async function main() {
                     });
                     break;
                 }
-                case "12":
+                case "14":
                     batalha.replay();
                     break;
-                case "13":
+                case "15":
                     console.log(batalha.resumoBatalha());
                     break;
-                case "14":
+                case "16":
                     console.log("Estado atual:", estado);
                     break;
-                case "15": {
+                case "17": {
                     if (qtdPersonagens === 0) {
                         console.log("Nenhum personagem criado para consulta.");
                         break;

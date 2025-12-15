@@ -1,4 +1,4 @@
-import { Personagem } from "./personagem";
+import { Personagem, Aneurisma } from "./personagem";
 import { Acao, TipoAcao } from "./acoes";
 import { RegistroPersonagem } from "./registroPersonagem";
 import * as fs from "fs";
@@ -25,6 +25,7 @@ class Batalha {
 
         this._personagens.push(p);
     }
+
 
     getPersonagens(): Personagem[] {
         return this._personagens;

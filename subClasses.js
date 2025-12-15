@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PersonagemCustomizado = exports.Arqueiro = exports.Mago = exports.Guerreiro = void 0;
+exports.Aneurisma = exports.Guardiao = exports.Letalis = exports.PersonagemCustomizado = exports.Arqueiro = exports.Mago = exports.Guerreiro = void 0;
 const personagem_1 = require("./personagem");
 const acoes_1 = require("./acoes");
+const batalha_1 = require("./batalha");
 class Guerreiro extends personagem_1.Personagem {
     _defesa;
     _vidaInicial;
@@ -237,4 +238,80 @@ class PersonagemCustomizado extends personagem_1.Personagem {
     }
 }
 exports.PersonagemCustomizado = PersonagemCustomizado;
+class Letalis extends personagem_1.Personagem {
+    atacar(alvo) {
+        if (!this.estaVivo())
+            throw new Error("Letalis morto");
+        if (!alvo.estaVivo())
+            throw new Error("Alvo morto");
+        if (this === alvo)
+            throw new Error("Ataque inválido");
+        let danoFinal = alvo.vida;
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
+        }
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+        const acaoAtaque = new acoes_1.Acao(this, alvo, acoes_1.TipoAcao.ATAQUE, danoFinal, danoFinal === 0
+            ? `${this.nome} lança ataque em ${alvo.nome}, mas o ataque falha.`
+            : `${this.nome} lança ataque em ${alvo.nome}.`);
+        this.registrarAcao(acaoAtaque);
+        alvo.registrarAcao(acaoAtaque);
+        return [acaoAtaque];
+    }
+}
+exports.Letalis = Letalis;
+class Guardiao extends personagem_1.Personagem {
+    atacar(alvo) {
+        if (!this.estaVivo())
+            throw new Error("Letalis morto");
+        if (!alvo.estaVivo())
+            throw new Error("Alvo morto");
+        if (this === alvo)
+            throw new Error("Ataque inválido");
+        let danoFinal = this._ataque;
+        if (danoFinal > 0) {
+            throw new Error("Guardião não pode atacar");
+        }
+        const acaoAtaque = new acoes_1.Acao(this, alvo, acoes_1.TipoAcao.ATAQUE, danoFinal, danoFinal === 0
+            ? `${this.nome} lança ataque em ${alvo.nome}, mas o ataque falha.`
+            : `${this.nome} lança ataque em ${alvo.nome}.`);
+        this.registrarAcao(acaoAtaque);
+        alvo.registrarAcao(acaoAtaque);
+        return [acaoAtaque];
+    }
+}
+exports.Guardiao = Guardiao;
+// Aneurisma nâo implementado! Não Funcional
+class Aneurisma extends personagem_1.Personagem {
+    atacar(alvo) {
+        if (!this.estaVivo())
+            throw new Error("Aneurisma morto");
+        if (!alvo.estaVivo())
+            throw new Error("Alvo morto");
+        if (this === alvo)
+            throw new Error("Ataque inválido");
+        let dano = this.ataque;
+        let danoFinal = dano;
+        if (danoFinal > 0) {
+            alvo.receberDano(danoFinal);
+            this.registrarDanoCausado(danoFinal);
+        }
+        if (!alvo.estaVivo() && danoFinal > 0) {
+            this.registrarAbate();
+        }
+        const acaoAtaque = new acoes_1.Acao(this, alvo, acoes_1.TipoAcao.ATAQUE, danoFinal, danoFinal === 0
+            ? `${this.nome} lança ataque em ${alvo.nome}, mas o ataque falha.`
+            : `${this.nome} lança ataque em ${alvo.nome}.`);
+        this.receberDano(10);
+        const acaoAutodano = new acoes_1.Acao(this, this, acoes_1.TipoAcao.AUTODANO, 10, `${this.nome} sofre o custo da magia.`);
+        this.registrarAcao(acaoAtaque);
+        alvo.registrarAcao(acaoAtaque);
+        this.registrarAcao(acaoAutodano);
+        return [acaoAtaque, acaoAutodano];
+    }
+}
+exports.Aneurisma = Aneurisma;
 //# sourceMappingURL=subClasses.js.map

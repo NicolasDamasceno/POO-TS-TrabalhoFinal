@@ -1,5 +1,6 @@
 import { Personagem } from "./personagem";
-import { Guerreiro, Mago, Arqueiro, PersonagemCustomizado } from "./subClasses";
+import { Guerreiro, Mago, Arqueiro, PersonagemCustomizado, Letalis, Guardiao } from "./subClasses";
+import Letalis = require("./subClasses");
 
 class RegistroPersonagem {
     static criar(dados: any): Personagem {
@@ -51,6 +52,22 @@ class RegistroPersonagem {
                     dados.tipoCustom,
                     Number(dados.rouboVida),
                     Number(dados.chanceCritico)
+                );
+                break;
+            case "Letalis":
+                personagem = new Letalis(
+                    Number(dados.id),
+                    dados.nome,
+                    vidaConstrutor,
+                    Number(dados.ataque)
+                );
+                break;
+            case "Guardiao":
+                personagem = new Guardiao(
+                    Number(dados.id),
+                    dados.nome,
+                    vidaConstrutor,
+                    Number(dados.ataque)
                 );
                 break;
 

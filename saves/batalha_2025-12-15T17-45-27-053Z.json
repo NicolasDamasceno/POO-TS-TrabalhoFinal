@@ -1,0 +1,74 @@
+{
+  "estado": "EM_ANDAMENTO",
+  "rodada": 5,
+  "vencedor": null,
+  "personagens": [
+    {
+      "tipo": "PersonagemCustomizado",
+      "id": 1,
+      "nome": "Alucard",
+      "vida": 60,
+      "ataque": 20,
+      "danoCausado": 0,
+      "danoRecebido": 40,
+      "abates": 0,
+      "tipoCustom": "Vampiro",
+      "rouboVida": 100,
+      "chanceCritico": 100
+    },
+    {
+      "tipo": "Guerreiro",
+      "id": 2,
+      "nome": "Trevor",
+      "vida": 100,
+      "ataque": 40,
+      "danoCausado": 40,
+      "danoRecebido": 0,
+      "abates": 0,
+      "defesa": 30,
+      "vidaInicial": 100
+    }
+  ],
+  "acoes": [
+    {
+      "id": 1,
+      "origem": "Trevor",
+      "alvo": "Alucard",
+      "tipo": "ATAQUE",
+      "valorDano": 40,
+      "descricao": "Trevor ataca Alucard com sua espada.",
+      "rodada": 1,
+      "dataHora": "2025-12-15T17:44:37.870Z"
+    },
+    {
+      "id": 2,
+      "origem": "Alucard",
+      "alvo": "Trevor",
+      "tipo": "ATAQUE_CRITICO",
+      "valorDano": 0,
+      "descricao": "Alucard (Vampiro) ataca Trevor, mas o ataque é BLOQUEADO.",
+      "rodada": 2,
+      "dataHora": "2025-12-15T17:44:47.754Z"
+    },
+    {
+      "id": 3,
+      "origem": "Alucard",
+      "alvo": "Trevor",
+      "tipo": "ATAQUE_CRITICO",
+      "valorDano": 0,
+      "descricao": "Alucard (Vampiro) ataca Trevor, mas o ataque é BLOQUEADO.",
+      "rodada": 3,
+      "dataHora": "2025-12-15T17:44:59.593Z"
+    },
+    {
+      "id": 4,
+      "origem": "Alucard",
+      "alvo": "Trevor",
+      "tipo": "ATAQUE_CRITICO",
+      "valorDano": 0,
+      "descricao": "Alucard (Vampiro) ataca Trevor, mas o ataque é BLOQUEADO.",
+      "rodada": 4,
+      "dataHora": "2025-12-15T17:45:14.294Z"
+    }
+  ]
+}

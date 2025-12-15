@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TipoAcao = exports.Acao = void 0;
+const personagem_1 = require("./personagem");
 var TipoAcao;
 (function (TipoAcao) {
     TipoAcao["ATAQUE"] = "ATAQUE";
@@ -10,8 +11,7 @@ var TipoAcao;
     TipoAcao["ATAQUE_CRITICO"] = "ATAQUE_CRITICO";
     TipoAcao["ROUBO_VIDA"] = "ROUBO_VIDA";
     TipoAcao["AUTODANO"] = "AUTODANO";
-})(TipoAcao || (TipoAcao = {}));
-exports.TipoAcao = TipoAcao;
+})(TipoAcao || (exports.TipoAcao = TipoAcao = {}));
 let contadorId = 1;
 class Acao {
     _id;

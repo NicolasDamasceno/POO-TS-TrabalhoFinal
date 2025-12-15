@@ -1,0 +1,212 @@
+{
+  "estado": "FINALIZADA",
+  "rodada": 14,
+  "vencedor": null,
+  "personagens": [
+    {
+      "tipo": "Guerreiro",
+      "id": 1,
+      "nome": "Thorlan",
+      "vida": 0,
+      "ataque": 25,
+      "danoCausado": 100,
+      "danoRecebido": 120,
+      "abates": 1,
+      "defesa": 15,
+      "vidaInicial": 100
+    },
+    {
+      "tipo": "Mago",
+      "id": 2,
+      "nome": "Lyra",
+      "vida": 0,
+      "ataque": 30,
+      "danoCausado": 150,
+      "danoRecebido": 105,
+      "abates": 1
+    },
+    {
+      "tipo": "Arqueiro",
+      "id": 3,
+      "nome": "Legolas",
+      "vida": 0,
+      "ataque": 15,
+      "danoCausado": 45,
+      "danoRecebido": 110,
+      "abates": 0,
+      "ataqueMultiplo": 3
+    }
+  ],
+  "acoes": [
+    {
+      "id": 1,
+      "origem": "Legolas",
+      "alvo": "Thorlan",
+      "tipo": "ATAQUE",
+      "valorDano": 0,
+      "descricao": "Legolas ataca Thorlan, mas o ataque é BLOQUEADO.",
+      "rodada": 1,
+      "dataHora": "2025-12-15T17:39:04.374Z"
+    },
+    {
+      "id": 2,
+      "origem": "Legolas",
+      "alvo": "Thorlan",
+      "tipo": "ATAQUE_MULTIPLO",
+      "valorDano": 30,
+      "descricao": "Legolas dispara ATAQUE MÚLTIPLO em Thorlan!",
+      "rodada": 2,
+      "dataHora": "2025-12-15T17:39:11.657Z"
+    },
+    {
+      "id": 3,
+      "origem": "Lyra",
+      "alvo": "Legolas",
+      "tipo": "MAGIA",
+      "valorDano": 60,
+      "descricao": "Lyra lança magia em Legolas.",
+      "rodada": 3,
+      "dataHora": "2025-12-15T17:39:44.282Z"
+    },
+    {
+      "id": 4,
+      "origem": "Lyra",
+      "alvo": "Lyra",
+      "tipo": "AUTODANO",
+      "valorDano": 10,
+      "descricao": "Lyra sofre o custo da magia.",
+      "rodada": 3,
+      "dataHora": "2025-12-15T17:39:44.282Z"
+    },
+    {
+      "id": 5,
+      "origem": "Lyra",
+      "alvo": "Thorlan",
+      "tipo": "MAGIA",
+      "valorDano": 30,
+      "descricao": "Lyra lança magia em Thorlan.",
+      "rodada": 4,
+      "dataHora": "2025-12-15T17:40:34.712Z"
+    },
+    {
+      "id": 6,
+      "origem": "Lyra",
+      "alvo": "Lyra",
+      "tipo": "AUTODANO",
+      "valorDano": 10,
+      "descricao": "Lyra sofre o custo da magia.",
+      "rodada": 4,
+      "dataHora": "2025-12-15T17:40:34.712Z"
+    },
+    {
+      "id": 7,
+      "origem": "Legolas",
+      "alvo": "Thorlan",
+      "tipo": "ATAQUE",
+      "valorDano": 0,
+      "descricao": "Legolas ataca Thorlan, mas o ataque é BLOQUEADO.",
+      "rodada": 5,
+      "dataHora": "2025-12-15T17:40:45.933Z"
+    },
+    {
+      "id": 8,
+      "origem": "Legolas",
+      "alvo": "Lyra",
+      "tipo": "ATAQUE",
+      "valorDano": 15,
+      "descricao": "Legolas dispara flecha em Lyra.",
+      "rodada": 6,
+      "dataHora": "2025-12-15T17:40:46.765Z"
+    },
+    {
+      "id": 9,
+      "origem": "Legolas",
+      "alvo": "Thorlan",
+      "tipo": "ATAQUE",
+      "valorDano": 0,
+      "descricao": "Legolas ataca Thorlan, mas o ataque é BLOQUEADO.",
+      "rodada": 7,
+      "dataHora": "2025-12-15T17:40:47.233Z"
+    },
+    {
+      "id": 10,
+      "origem": "Thorlan",
+      "alvo": "Lyra",
+      "tipo": "ATAQUE",
+      "valorDano": 25,
+      "descricao": "Thorlan ataca Lyra com sua espada.",
+      "rodada": 8,
+      "dataHora": "2025-12-15T17:40:47.669Z"
+    },
+    {
+      "id": 11,
+      "origem": "Thorlan",
+      "alvo": "Legolas",
+      "tipo": "ATAQUE",
+      "valorDano": 25,
+      "descricao": "Thorlan ataca Legolas com sua espada.",
+      "rodada": 9,
+      "dataHora": "2025-12-15T17:40:48.105Z"
+    },
+    {
+      "id": 12,
+      "origem": "Thorlan",
+      "alvo": "Legolas",
+      "tipo": "ATAQUE",
+      "valorDano": 25,
+      "descricao": "Thorlan ataca Legolas com sua espada.",
+      "rodada": 10,
+      "dataHora": "2025-12-15T17:40:48.528Z"
+    },
+    {
+      "id": 13,
+      "origem": "Thorlan",
+      "alvo": "Lyra",
+      "tipo": "ATAQUE",
+      "valorDano": 25,
+      "descricao": "Thorlan ataca Lyra com sua espada.",
+      "rodada": 11,
+      "dataHora": "2025-12-15T17:40:48.920Z"
+    },
+    {
+      "id": 14,
+      "origem": "Lyra",
+      "alvo": "Thorlan",
+      "tipo": "MAGIA",
+      "valorDano": 30,
+      "descricao": "Lyra lança magia em Thorlan.",
+      "rodada": 12,
+      "dataHora": "2025-12-15T17:40:49.342Z"
+    },
+    {
+      "id": 15,
+      "origem": "Lyra",
+      "alvo": "Lyra",
+      "tipo": "AUTODANO",
+      "valorDano": 10,
+      "descricao": "Lyra sofre o custo da magia.",
+      "rodada": 12,
+      "dataHora": "2025-12-15T17:40:49.342Z"
+    },
+    {
+      "id": 16,
+      "origem": "Lyra",
+      "alvo": "Thorlan",
+      "tipo": "MAGIA",
+      "valorDano": 30,
+      "descricao": "Lyra lança magia em Thorlan.",
+      "rodada": 13,
+      "dataHora": "2025-12-15T17:40:49.748Z"
+    },
+    {
+      "id": 17,
+      "origem": "Lyra",
+      "alvo": "Lyra",
+      "tipo": "AUTODANO",
+      "valorDano": 10,
+      "descricao": "Lyra sofre o custo da magia.",
+      "rodada": 13,
+      "dataHora": "2025-12-15T17:40:49.748Z"
+    }
+  ]
+}

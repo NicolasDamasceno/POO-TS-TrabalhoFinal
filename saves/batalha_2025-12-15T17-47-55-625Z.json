@@ -1,0 +1,72 @@
+{
+  "estado": "FINALIZADA",
+  "rodada": 3,
+  "vencedor": null,
+  "personagens": [
+    {
+      "tipo": "Mago",
+      "id": 1,
+      "nome": "Lyra",
+      "vida": 50,
+      "ataque": 30,
+      "danoCausado": 30,
+      "danoRecebido": 50,
+      "abates": 0
+    },
+    {
+      "tipo": "PersonagemCustomizado",
+      "id": 2,
+      "nome": "Alucard",
+      "vida": 74,
+      "ataque": 20,
+      "danoCausado": 40,
+      "danoRecebido": 30,
+      "abates": 0,
+      "tipoCustom": "Vam",
+      "rouboVida": 10,
+      "chanceCritico": 100
+    }
+  ],
+  "acoes": [
+    {
+      "id": 1,
+      "origem": "Lyra",
+      "alvo": "Alucard",
+      "tipo": "MAGIA",
+      "valorDano": 30,
+      "descricao": "Lyra lança magia em Alucard.",
+      "rodada": 1,
+      "dataHora": "2025-12-15T17:47:48.616Z"
+    },
+    {
+      "id": 2,
+      "origem": "Lyra",
+      "alvo": "Lyra",
+      "tipo": "AUTODANO",
+      "valorDano": 10,
+      "descricao": "Lyra sofre o custo da magia.",
+      "rodada": 1,
+      "dataHora": "2025-12-15T17:47:48.616Z"
+    },
+    {
+      "id": 3,
+      "origem": "Alucard",
+      "alvo": "Lyra",
+      "tipo": "ATAQUE_CRITICO",
+      "valorDano": 40,
+      "descricao": "Alucard (Vam) desfere um ATAQUE CRÍTICO em Lyra!",
+      "rodada": 2,
+      "dataHora": "2025-12-15T17:47:48.616Z"
+    },
+    {
+      "id": 4,
+      "origem": "Alucard",
+      "alvo": "Alucard",
+      "tipo": "ROUBO_VIDA",
+      "valorDano": 4,
+      "descricao": "Alucard (Vam) rouba 4 de vida.",
+      "rodada": 2,
+      "dataHora": "2025-12-15T17:47:48.616Z"
+    }
+  ]
+}
